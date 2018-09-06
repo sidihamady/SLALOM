@@ -1,0 +1,176 @@
+# ======================================================================================================
+# SLALOM - Open-Source Solar Cell Multivariate Optimizer
+# Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
+# (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
+# (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
+# (*) sidi.hamady@univ-lorraine.fr
+# Version: 1.0 Build : 1807
+# SLALOM source code is available to download here : http ://www.hamady.org/photovoltaics/slalom_source.zip
+# See Copyright Notice in COPYRIGHT
+# ======================================================================================================
+
+# ------------------------------------------------------------------------------------------------------
+# File:        InGaN_PN.in
+# Type:        Deckbuild input
+# Purposes:    PN InGaN based solar cell
+# NB:          The output filenames (simuloutput_*) should remain unchanged and consistent
+#              ... between the optimizer Python code and the simulator input (this file)
+# ------------------------------------------------------------------------------------------------------
+
+go atlas
+
+#<START-Optim>
+
+# Indium composition in InGaN
+set AlloyComp=0.25
+
+# P-layer composition, thickness and doping
+set PLayerComp=$AlloyComp
+set PLayerThick=0.050
+set PLayerDop=1e+18
+
+# N-layer composition, thickness and doping
+set NLayerComp=$AlloyComp
+set NLayerThick=0.500
+set NLayerDop=1e+17
+#
+
+#<END-Optim>
+
+# Highest bandgap value in the structure, used to calculate the highest voltage to reach
+# if VOC cannot be evaluated, increase this value or/and increase the number of points (voltagePoints)
+set BandgapHigh=($NLayerComp*0.7)+((1.0-$NLayerComp)*3.42)-(1.43*$NLayerComp*(1.0-$NLayerComp))
+
+# Voltage range (number of points, start and end values)
+# the end value is calculated to be close to VOC, in order to optimize...
+# ... the calculation cost.
+set voltagePoints=100
+set voltageStart=0
+# VOC = (Eg/q) - f(JSC, J0)
+set voltageEnd=$BandgapHigh-0.3
+set voltageStep=$voltageEnd/$voltagePoints
+
+# Mesh points (to adapt, keeping a reasonable compromise between calculation cost/precision)
+set NPointsX=10
+# Set NPointsYlayer taking into account the whole range
+set NPointsYlayer1=50
+set NPointsYlayer2=50
+set DeviceDimX=1
+set DeviceSpacingX=$DeviceDimX/$NPointsX
+# Area in cm^2
+set DeviceArea = $DeviceDimX * 1e-8
+
+# Ray-tracing beam parameters (normal incidence)
+set BeamYorigin=-0.1
+set BeamXorigin=0.0
+set BeamXmin=0.0
+set BeamXmax=$DeviceDimX
+set BeamAngle=90.0
+set BeamWstart=0.2
+set BeamWend=(1.24/$BandgapHigh) + 0.100
+set BeamWnum=201
+set BeamWstep=($BeamWend-$BeamWstart)/($BeamWnum-1)
+set BeamDblPrecision=1e-13
+
+mesh auto
+x.mesh loc=0.0 spacing=$DeviceSpacingX
+x.mesh loc=$DeviceDimX spacing=$DeviceSpacingX
+
+# Solar cell regions
+region number=1 material=InGaN bot ny=$NPointsYlayer1 x.comp=$PLayerComp thick=$PLayerThick
+region number=2 material=InGaN bot ny=$NPointsYlayer2 x.comp=$NLayerComp thick=$NLayerThick
+
+# Solar cell electrodes
+electrode number=1 name=anode top
+electrode number=2 name=cathode bottom
+
+# Doping parameters
+doping region=1 uniform conc=$PLayerDop p.type
+doping region=2 uniform conc=$NLayerDop n.type
+
+structure outfile="simuloutput_mesh.dat"
+#tonyplot "simuloutput_mesh.dat"
+
+# All the material parameters are defined in C source files...
+# ... to keep these values at the experimental state-of-the-art...
+# ... and the physical models as precise as possible.
+material    material=InGaN                    \
+            f.bandcomp="InGaN_Bandgap.c"      \
+            f.epsilon="InGaN_Permittivity.c"  \
+            f.taun="InGaN_Recomb.c"           \
+            f.taup="InGaN_Recomb.c"           \
+            f.copt="InGaN_Recomb.c"           \
+            f.gaun="InGaN_Recomb.c"           \
+            f.gaup="InGaN_Recomb.c"           \
+            f.index="InGaN_Index.c"           \
+            f.conmun="InGaN_Mobility.c"       \
+            f.conmup="InGaN_Mobility.c"
+
+# Contact parameters
+contact     name=anode neutral
+contact     name=cathode neutral
+
+# Model parameters (include at least SRH and Auger)
+models      srh auger optr print
+
+# Numerical method (Newton or Gummel)
+method      newton maxtraps=10 itlimit=100
+
+#<START-Band>
+# band diagram at equilibrium
+output      band.param
+solve       init
+solve       previous
+save        outfile="simuloutput_band.dat"
+#<END-Band>
+
+#<START-SpectralResponse>
+# the solar cell spectral response at 0 V
+beam        number=1 angle=$BeamAngle y.origin=$BeamYorigin x.origin=$BeamXorigin xmin=$BeamXmin xmax=$BeamXmax
+solve       init
+solve       b1=0.0
+solve       previous vanode=0.000
+log         outfile="simuloutput_spectralresponse.log"
+solve       b1=1.0 lambda=$BeamWstart wstep=$BeamWstep wfinal=$BeamWend
+#<END-SpectralResponse>
+
+#<START-JVChar>
+# the solar cell J-V characteristic under AM1.5 illumination
+beam        number=2 angle=$BeamAngle y.origin=$BeamYorigin x.origin=$BeamXorigin xmin=$BeamXmin xmax=$BeamXmax AM1.5
+solve       init
+solve       b2=1.0
+log         outfile="simuloutput_all.log"
+solve       name=anode vanode=$voltageStart vstep=$voltageStep vfinal=$voltageEnd
+log         off
+#<END-JVChar>
+
+go atlas
+
+# extract the output parameters from simulation results:
+# (In)External Quantum Efficiency, Photovoltaic parameters (JSC, VOC, FF and efficiency)
+
+extract     init infile="simuloutput_spectralresponse.log"
+extract     name="EQE" curve(elect."optical wavelength", -(i."anode")/(elect."source photo current" + $BeamDblPrecision), x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_spectralresponse_eqe.log"
+extract     name="IQE" curve(elect."optical wavelength", -(i."anode")/(elect."available photo current" + $BeamDblPrecision), x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_spectralresponse_iqe.log"
+extract     name="SPC" curve(elect."optical wavelength", elect."source photo current", x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_photocurrent_source.log"
+extract     name="APC" curve(elect."optical wavelength", elect."available photo current", x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_photocurrent_available.log"
+tonyplot    "simuloutput_spectralresponse_eqe.log" -overlay "simuloutput_spectralresponse_iqe.log"
+
+extract     init infile="simuloutput_all.log"
+# J in mA/cm^2 and P in mW/cm^2
+extract     name="Jsc" y.val from curve(v."anode", i."anode" * 1000 / $DeviceArea) where x.val=0.0
+extract     name="Voc" x.val from curve(v."anode", i."anode" * 1000 / $DeviceArea) where y.val=0.0
+extract     name="J"   curve(v."anode", i."anode" * 1000 / $DeviceArea, x.min=$voltageStart x.max=$voltageEnd) outfile="simuloutput_jv.log"
+extract     name="Jp"  curve(v."anode", i."anode" * 1000 / $DeviceArea, x.min=0 x.max=$"Voc") outfile="simuloutput_jvp.log"
+extract     name="P"   curve(v."anode", (v."anode" * i."anode" * 1000 / $DeviceArea)) outfile="simuloutput_pv.log"
+extract     name="Pm"  abs(min(curve(v."anode", (v."anode" * i."anode" * 1000 / $DeviceArea))))
+extract     name="Vm"  x.val from curve(v."anode", (v."anode"*i."anode" * 1000 / $DeviceArea)) where y.val=$"Pm" datafile="simuloutput.log"
+extract     name="Im"  $"Pm"/$"Vm" datafile="simuloutput.log"
+extract     name="FF"  100*abs($"Pm"/($"Jsc"*$"Voc")) datafile="simuloutput.log"
+# AM 1.5 power in mW/cm^2
+extract     name="Popt"       1000 * max(beam."2") datafile="simuloutput_popt.log"
+extract     name="Efficiency" (100 * $Pm / $"Popt") datafile="simuloutput.log"
+extract     name="Efficiency" (100 * $Pm / $"Popt") datafile="simuloutput_efficiency.log"
+tonyplot    "simuloutput_jvp.log"
+
+quit

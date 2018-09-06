@@ -1,0 +1,45 @@
+# ======================================================================================================
+# SLALOM - Open-Source Solar Cell Multivariate Optimizer
+# Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
+# (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
+# (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
+# (*) sidi.hamady@univ-lorraine.fr
+# Version: 1.0 Build: 1807
+# SLALOM source code is available to download here: http://www.hamady.org/photovoltaics/slalom_source.zip
+# See Copyright Notice in COPYRIGHT
+# ======================================================================================================
+
+>>> The complete documentation is located in the Guide directory. <<<
+
+Solar Cell Multivariate Optimizer requirements:
+* Python version 2.7.x or later
+* numpy version 1.5 or later
+* scipy version 0.13.1 or later
+* matplotlib version 1.3.x or later
+* tkinter 8.5 or later (required only for the GUI monitor)
+
+Linux:
+	* Python is already installed with almost any Linux distribution.
+	* For RedHat (or clones such as CentOS or Scientific Linux, or Fedora), numpy, scipy and matplotlib can be installed using yum:
+	sudo yum install python-numpy python-scipy python-matplotlib python-matplotlib-tk python-tools
+
+
+	cd /opt
+	wget --no-check-certificate https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tar.xz
+	tar -xvf Python-2.7.12.tar.xz
+	cd Python-2.7.12
+	./configure --prefix=/usr/local
+	make && make altinstall
+	wget https://bootstrap.pypa.io/get-pip.py
+	python2.7 get-pip.py
+	python2.7 -m pip install --upgrade numpy
+	python2.7 -m pip install --upgrade scipy
+
+
+Windows:
+	Two methods (at least!) to install Python and scipy/numpy/matplotlib under Windows:
+		1. * Download Python: https://www.python.org/downloads/release/python-2712/
+			* Choose preferebly Python 2.7.12 and install it
+			* http://www.lfd.uci.edu/~gohlke/pythonlibs/
+		2. Download and install the Anaconda distribution: https://www.continuum.io/downloads
+			* preferably pick Python 2.7 version

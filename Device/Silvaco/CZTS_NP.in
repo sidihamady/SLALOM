@@ -1,0 +1,106 @@
+# (C) Sidi HAMADY
+
+go atlas
+
+set ZnOLayerThick=0.1
+set ZnOLayerDop=1e+18
+
+set CdSLayerThick=0.1
+set CdSLayerDop=1e+18
+
+set CZTSLayerThick=1
+set CZTSLayerDop=1e+16
+
+set Taun=1e-7
+set Taup=1e-7
+
+set voltageStart=-1.5
+set voltageEnd=0.1
+set voltageStep=0.01
+
+set NPointsX=10
+set NPointsYlayer1=20
+set NPointsYlayer2=20
+set NPointsYlayer3=100
+set DeviceDimX=1
+set DeviceSpacingX=$DeviceDimX/$NPointsX
+# Area in cm^2
+set DeviceArea = $DeviceDimX * 1e-8
+
+set BeamYorigin=-0.1
+set BeamXorigin=0.0
+set BeamXmin=0.0
+set BeamXmax=$DeviceDimX
+set BeamAngle=90.0
+set BeamWstart=0.3
+set BeamWend=3.0
+set BeamWnum=1000
+set BeamWstep=($BeamWend-$BeamWstart)/($BeamWnum-1)
+set BeamDblPrecision=1e-13
+
+mesh auto
+x.mesh loc=0.0 spacing=$DeviceSpacingX
+x.mesh loc=$DeviceDimX spacing=$DeviceSpacingX
+
+region number=1 material=ZnO        bot ny=$NPointsYlayer1 thick=$ZnOLayerThick
+region number=2 material=CdS        bot ny=$NPointsYlayer2 thick=$CdSLayerThick
+region number=3 user.material=CZTS  bot ny=$NPointsYlayer3 thick=$CZTSLayerThick
+
+electrode number=1 name=anode   top
+electrode number=2 name=cathode bottom
+
+doping region=1 uniform conc=$ZnOLayerDop   taun=$Taun taup=$Taup n.type
+doping region=2 uniform conc=$CdSLayerDop   taun=$Taun taup=$Taup n.type
+doping region=3 uniform conc=$CZTSLayerDop  taun=$Taun taup=$Taup p.type
+
+material material=ZnO eg300=3.3 permittivity=9.0 affinity=4.4       \
+    mun=100.0 mup=25.0 nc300=2.2e18 nv300=1.8e19                    \
+    copt=1e-12 augn=1e-30 augp=1e-30                                \
+    bgn.e=0 gcb=1 gvb=1 edb=0 eab=0 taun0=$Taun taup0=$Taup         \
+    f.index="ZnO_Index.c"
+    
+material material=CdS eg300=2.42 permittivity=9.0 affinity=4.2      \
+    mun=1000.0 mup=150.0 nc300=1.8e19 nv300=2.4e18                  \
+    copt=1e-12 augn=1e-30 augp=1e-30                                \
+    bgn.e=0 gcb=1 gvb=1 edb=0 eab=0 taun0=$Taun taup0=$Taup         \
+    f.index="CdS_Index.c"
+
+material material=CZTS eg300=1.5 permittivity=6.5 affinity=4.5      \
+    mun=100 mup=25 nc300=2.1e18 nv300=8.9e18                        \
+    copt=1e-12 augn=1e-30 augp=1e-30                                \
+    bgn.e=0 gcb=1 gvb=1 edb=0 eab=0 taun0=$Taun taup0=$Taup         \
+    f.index="CZTS_Index.c"
+
+contact     name=anode      neutral
+contact     name=cathode    neutral
+
+models      optr auger srh print
+
+method      newton maxtraps=10 itlimit=100
+
+beam        number=1 angle=$BeamAngle y.origin=$BeamYorigin x.origin=$BeamXorigin xmin=$BeamXmin xmax=$BeamXmax AM1.5
+
+solve       init
+solve       b1=1.0
+log         outfile="simuloutput_all.log"
+solve       name=anode vanode=$voltageStart vstep=$voltageStep vfinal=$voltageEnd
+log         off
+
+go atlas
+
+extract     init infile="simuloutput_all.log"
+# J in mA/cm^2 and P in mW/cm^2
+extract     name="Jsc" y.val from curve(v."anode", 1000 * i."anode" / $DeviceArea) where x.val=0.0
+extract     name="Voc" x.val from curve(v."anode", 1000 * i."anode" / $DeviceArea) where y.val=0.0
+extract     name="J"   curve(v."anode", 1000 * i."anode" / $DeviceArea, x.min=$voltageStart x.max=$voltageEnd) outfile="simuloutput_jv.log"
+extract     name="Jp"  curve(v."anode", 1000 * i."anode" / $DeviceArea, x.min=$"Voc" x.max=0) outfile="simuloutput_jvp.log"
+extract     name="P"   curve(v."anode", (v."anode" * 1000 * i."anode" / $DeviceArea)) outfile="simuloutput_pv.log"
+extract     name="Pm"  abs(min(curve(v."anode", (v."anode" * 1000 * i."anode" / $DeviceArea))))
+extract     name="FF"  100*abs($"Pm"/($"Jsc"*$"Voc")) datafile="simuloutput.log"
+# AM 1.5 power in mW/cm^2
+extract     name="Popt"       1000 * max(beam."1")  datafile="simuloutput_popt.log"
+extract     name="Efficiency" (100 * $Pm / $"Popt") datafile="simuloutput.log"
+extract     name="Efficiency" (100 * $Pm / $"Popt") datafile="simuloutput_efficiency.log"
+#tonyplot    "simuloutput_jvp.log"
+
+quit
