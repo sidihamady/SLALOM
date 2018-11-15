@@ -1,6 +1,6 @@
 # SLALOM - SoLAr CelL Multivariate OptiMizer
 
-Complete documentation here: [Guide/slalom_guide.pdf](https://github.com/sidihamady/SLALOM/Guide/slalom_guide.pdf)
+Complete documentation here: [Guide/slalom_guide.pdf](https://github.com/sidihamady/SLALOM/blob/master/Guide/slalom_guide.pdf)
 
 SLALOM  is a set of open-source Python programs implementing 
 a rigorous mathematical methods for the optimization of solar cells using as backend 
@@ -52,7 +52,7 @@ Two methods (at least!) to install Python and scipy/numpy/matplotlib under Windo
 2. Download and install the Anaconda distribution: [https://www.anaconda.com/distribution/](https://www.anaconda.com/distribution/)
 * preferably pick Python 2.7 version
 
-See [Guide/slalom_guide.pdf](https://github.com/sidihamady/SLALOM/Guide/slalom_guide.pdf) for a complete guide.
+See [Guide/slalom_guide.pdf](https://github.com/sidihamady/SLALOM/blob/master/Guide/slalom_guide.pdf) for a complete guide.
 
 ![SLALOM screenshot](screenshot1.png)
 
