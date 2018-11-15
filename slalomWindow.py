@@ -6,8 +6,11 @@
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
-# Version: 1.0 Build: 1807
-# SLALOM source code is available to download here: http://www.hamady.org/photovoltaics/slalom_source.zip
+# Version: 1.0 Build: 1811
+# SLALOM source code is available to download from:
+# https://github.com/sidihamady/SLALOM
+# https://hal.archives-ouvertes.fr/hal-01897934v1
+# http://www.hamady.org/photovoltaics/slalom_source.zip
 # See Copyright Notice in COPYRIGHT
 # ======================================================================================================
 
@@ -93,6 +96,10 @@ except:
     pass
 
 import tkFont
+
+# :REV:1:20181115: suppress a nonrelevant warning from matplotlib
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class OptimizerViewer(Tk.Frame):
     """ view the optimization data file in realtime """
@@ -322,6 +329,8 @@ class OptimizerReport(Tk.Frame):
 
         self.indexm = 0
 
+        self.currentsign = 1.0
+
         paramFrame = Tk.Frame(self.root)
         paramFrame.pack(fill=Tk.X, padx=5, pady=5)
         self.paramlistBox = ttk.Combobox(paramFrame, state='readonly')
@@ -499,8 +508,8 @@ class OptimizerReport(Tk.Frame):
                 if (self.plot.mliney is not None):
                     self.plot.mliney.remove()
                 # end if
-                self.plot.mlinex = self.plot.hlines(y=-Jm, xmin=0.0, xmax=Vm, linewidth=1, colors='g', linestyles='dashed', zorder=4)
-                self.plot.mliney = self.plot.vlines(x=Vm, ymin=-Jm, ymax=0.0, linewidth=1, colors='g', linestyles='dashed', zorder=4)
+                self.plot.mlinex = self.plot.hlines(y=Jm * self.currentsign, xmin=0.0, xmax=Vm, linewidth=1, colors='g', linestyles='dashed', zorder=4)
+                self.plot.mliney = self.plot.vlines(x=Vm, ymin=Jm * self.currentsign, ymax=0.0, linewidth=1, colors='g', linestyles='dashed', zorder=4)
                 # end if
             # end if
 
@@ -572,15 +581,15 @@ class OptimizerReport(Tk.Frame):
                         pass
                     if xprev is None:
                         xprev = xval
-                    elif xval <= xprev:
-                        # x (voltage or wavelength) are monotically increasing.
-                        break
+                    elif xval > xprev:
+                        # :REV:1:20181115: keep only (voltage or wavelength) that are monotically increasing
+                        # but do not break (sometimes the simulator saves the same point)
+                        self.datax[ida] = np.append(self.datax[ida], xval)
+                        self.datay[ida] = np.append(self.datay[ida], yval)
+                        xprev = xval
+                        curPoints += 1
                     # end if
-                    self.datax[ida] = np.append(self.datax[ida], xval)
-                    self.datay[ida] = np.append(self.datay[ida], yval)
-                    xprev = xval
-                    curPoints += 1
-                # end if
+                # end for
 
                 if ida == 0:
                     prevPoints = curPoints
@@ -588,6 +597,8 @@ class OptimizerReport(Tk.Frame):
                     tkMessageBox.showwarning("SLALOM", "Report data not valid (number of points: %d)" % curPoints, parent=self.root)
                     return
                 # end if
+
+                self.currentsign = 1.0 if (self.datay[ida][0] > 0.0) else -1.0
 
                 del arrLine[:]
                 arrLine = list()
@@ -718,7 +729,7 @@ class slalomWindow(object):
 
     def __init__(self, dataFilename, remoteHost = None, simulator = "atlas"):
 
-        self.__version__ = "Version 1.0 Build 1710"
+        self.__version__ = "Version: 1.0 Build: 1711"
 
         self.deviceSimulator = simulator
 
@@ -1494,7 +1505,7 @@ class slalomWindow(object):
             pass
     # end onEntrySelectAll
 
-    def onDataFilenameValidate(self, sv):
+    def onDataFilenameValidate(self, sp):
         try:
             if (not sp) or (len(sp) <= 255):
                 self.dataFilenameEdit.prev = sp
@@ -1863,7 +1874,7 @@ class slalomWindow(object):
         # end if
         if dataNV:
             tkMessageBox.showwarning("SLALOM", "Report data files not found", parent=self.root)
-            return
+            pass
         # end if
 
         try:
@@ -2704,7 +2715,7 @@ class slalomWindow(object):
                               "(1) Université de Lorraine, LMOPS, Metz, F-57070, France\n" +
                               "(2) LMOPS, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France\n" +
                               "(*) sidi.hamady@univ-lorraine.fr\n" +
-                              "Version 1.0 Build 1709\n" +
+                              "Version: 1.0 Build: 1711\n" +
                               "The user manual is in the Guide directory\n" +
                               "See Copyright Notice in COPYRIGHT"),
                               parent=self.root)

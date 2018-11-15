@@ -1,4 +1,24 @@
-# (C) Sidi HAMADY
+# ======================================================================================================
+# SLALOM - Open-Source Solar Cell Multivariate Optimizer
+# Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
+# (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
+# (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
+# (*) sidi.hamady@univ-lorraine.fr
+# Version: 1.0 Build: 1811
+# SLALOM source code is available to download from:
+# https://github.com/sidihamady/SLALOM
+# https://hal.archives-ouvertes.fr/hal-01897934v1
+# http ://www.hamady.org/photovoltaics/slalom_source.zip
+# See Copyright Notice in COPYRIGHT
+# ======================================================================================================
+
+# ------------------------------------------------------------------------------------------------------
+# File:        CZTS_NP.in
+# Type:        Deckbuild input
+# Purposes:    PN InGaN based solar cell
+# NB:          The output filenames (simuloutput_*) should remain unchanged and consistent
+#              ... between the optimizer Python code and the simulator input (this file)
+# ------------------------------------------------------------------------------------------------------
 
 go atlas
 
@@ -78,16 +98,40 @@ models      optr auger srh print
 
 method      newton maxtraps=10 itlimit=100
 
-beam        number=1 angle=$BeamAngle y.origin=$BeamYorigin x.origin=$BeamXorigin xmin=$BeamXmin xmax=$BeamXmax AM1.5
-
+# :REV:1:20181115: add spectral response
+#<START-SpectralResponse>
+# the solar cell spectral response at 0 V
+beam        number=1 angle=$BeamAngle y.origin=$BeamYorigin x.origin=$BeamXorigin xmin=$BeamXmin xmax=$BeamXmax
 solve       init
-solve       b1=1.0
+solve       b1=0.0
+solve       previous vanode=0.000
+log         outfile="simuloutput_spectralresponse.log"
+solve       b1=1.0 lambda=$BeamWstart wstep=$BeamWstep wfinal=$BeamWend
+#<END-SpectralResponse>
+
+#<START-JVChar>
+beam        number=2 angle=$BeamAngle y.origin=$BeamYorigin x.origin=$BeamXorigin xmin=$BeamXmin xmax=$BeamXmax AM1.5
+solve       init
+solve       b2=1.0
 log         outfile="simuloutput_all.log"
 solve       name=anode vanode=$voltageStart vstep=$voltageStep vfinal=$voltageEnd
 log         off
+#<END-JVChar>
 
 go atlas
 
+# extract the output parameters from simulation results:
+# (In)External Quantum Efficiency, Photovoltaic parameters (JSC, VOC, FF and efficiency)
+
+# :REV:1:20181115: add spectral response
+extract     init infile="simuloutput_spectralresponse.log"
+extract     name="EQE" curve(elect."optical wavelength", (i."anode")/(elect."source photo current" + $BeamDblPrecision), x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_spectralresponse_eqe.log"
+extract     name="IQE" curve(elect."optical wavelength", (i."anode")/(elect."available photo current" + $BeamDblPrecision), x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_spectralresponse_iqe.log"
+extract     name="SPC" curve(elect."optical wavelength", elect."source photo current", x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_photocurrent_source.log"
+extract     name="APC" curve(elect."optical wavelength", elect."available photo current", x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_photocurrent_available.log"
+tonyplot    "simuloutput_spectralresponse_eqe.log" -overlay "simuloutput_spectralresponse_iqe.log"
+
+# :TODO:1:20181115: the J-V file saved by Deckbuild need to be treated in the Python code to have better control
 extract     init infile="simuloutput_all.log"
 # J in mA/cm^2 and P in mW/cm^2
 extract     name="Jsc" y.val from curve(v."anode", 1000 * i."anode" / $DeviceArea) where x.val=0.0
@@ -101,6 +145,6 @@ extract     name="FF"  100*abs($"Pm"/($"Jsc"*$"Voc")) datafile="simuloutput.log"
 extract     name="Popt"       1000 * max(beam."1")  datafile="simuloutput_popt.log"
 extract     name="Efficiency" (100 * $Pm / $"Popt") datafile="simuloutput.log"
 extract     name="Efficiency" (100 * $Pm / $"Popt") datafile="simuloutput_efficiency.log"
-#tonyplot    "simuloutput_jvp.log"
+tonyplot    "simuloutput_jvp.log"
 
 quit

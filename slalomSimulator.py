@@ -6,8 +6,11 @@
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
-# Version: 1.0 Build: 1807
-# SLALOM source code is available to download here: http://www.hamady.org/photovoltaics/slalom_source.zip
+# Version: 1.0 Build: 1811
+# SLALOM source code is available to download from:
+# https://github.com/sidihamady/SLALOM
+# https://hal.archives-ouvertes.fr/hal-01897934v1
+# http://www.hamady.org/photovoltaics/slalom_source.zip
 # See Copyright Notice in COPYRIGHT
 # ======================================================================================================
 
