@@ -17,7 +17,7 @@ It can be easily extended to use any simulator that have a standard input format
 
 SLALOM source code is available to download from:  
 [https://github.com/sidihamady/SLALOM](https://github.com/sidihamady/SLALOM)  
-[https://hal.archives-ouvertes.fr/hal-01897934v1](https://hal.archives-ouvertes.fr/hal-01897934v1)  
+[https://hal.archives-ouvertes.fr/hal-01897934](https://hal.archives-ouvertes.fr/hal-01897934)  
 [http://www.hamady.org/photovoltaics/slalom_source.zip](http://www.hamady.org/photovoltaics/slalom_source.zip)  
 
 SLALOM requirements:
@@ -46,7 +46,8 @@ python2.7 -m pip install --upgrade scipy
 
 Windows:
 Two methods (at least!) to install Python and scipy/numpy/matplotlib under Windows:
-1. * Download Python: [https://www.python.org/downloads/release/python-2712/](https://www.python.org/downloads/release/python-2712/)  
+1.
+* Download Python: [https://www.python.org/downloads/release/python-2712/](https://www.python.org/downloads/release/python-2712/)  
 * Choose preferebly Python 2.7.12 and install it  
 * [http://www.lfd.uci.edu/~gohlke/pythonlibs/](http://www.lfd.uci.edu/~gohlke/pythonlibs/)  
 2. Download and install the Anaconda distribution: [https://www.anaconda.com/distribution/](https://www.anaconda.com/distribution/)
