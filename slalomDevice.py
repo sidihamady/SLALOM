@@ -6,7 +6,6 @@
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
-# Version: 1.0 Build: 1811
 # SLALOM source code is available to download from:
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
@@ -29,13 +28,15 @@ import random
 import math
 import datetime
 
+from slalomCore import *
+
 class slalomDevice(object):
     """ Device definition class. Contains a set of predefined solar cell structures """
 
     def __init__(self, deviceType, currentDir, randomInit = False):
         """ slalomDevice constructor where the solar cell structures are defined """
 
-        self.__version__ = "Version 1.0 Build 1710"
+        self.__version__ = slalomVersion
 
         self.dirSepChar = '/'
 

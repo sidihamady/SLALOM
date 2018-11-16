@@ -6,7 +6,6 @@
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
-# Version: 1.0 Build: 1811
 # SLALOM source code is available to download from:
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
@@ -729,7 +728,7 @@ class slalomWindow(object):
 
     def __init__(self, dataFilename, remoteHost = None, simulator = "atlas"):
 
-        self.__version__ = "Version: 1.0 Build: 1711"
+        self.__version__ = slalomVersion
 
         self.deviceSimulator = simulator
 
@@ -2715,7 +2714,7 @@ class slalomWindow(object):
                               "(1) Université de Lorraine, LMOPS, Metz, F-57070, France\n" +
                               "(2) LMOPS, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France\n" +
                               "(*) sidi.hamady@univ-lorraine.fr\n" +
-                              "Version: 1.0 Build: 1711\n" +
+                              slalomVersion + "\n" +
                               "The user manual is in the Guide directory\n" +
                               "See Copyright Notice in COPYRIGHT"),
                               parent=self.root)

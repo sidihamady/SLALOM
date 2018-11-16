@@ -6,7 +6,6 @@
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
-# Version: 1.0 Build: 1811
 # SLALOM source code is available to download from:
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
@@ -58,7 +57,7 @@ try:
 
         def __init__(self, device, remoteDir, remoteHost, optimType, minimizeMethod, *args, **kwargs):
 
-            self.__version__ = "Version 1.0 Build 1710"
+            self.__version__ = slalomVersion
 
             self.device = device
             self.device.deviceType = 'User'
@@ -445,6 +444,14 @@ try:
 
     # end slalomDeviceGui
 
-except:
+except Exception as excT:
+
+    excType, excObj, excTb = sys.exc_info()
+    excFile = os.path.split(excTb.tb_frame.f_code.co_filename)[1]
+    strErr  = "\n! cannot initialize GUI:\n  %s\n  in %s (line %d)\n" % (str(excT), excFile, excTb.tb_lineno)
+    print(strErr)
+    os._exit(1)
+    # never reached
     pass
+
 # end try

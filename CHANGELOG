@@ -1,0 +1,24 @@
+# ======================================================================================================
+# SLALOM - Open-Source Solar Cell Multivariate Optimizer
+# Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
+# (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
+# (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
+# (*) sidi.hamady@univ-lorraine.fr
+# SLALOM source code is available to download from:
+# https://github.com/sidihamady/SLALOM
+# https://hal.archives-ouvertes.fr/hal-01897934
+# http://www.hamady.org/photovoltaics/slalom_source.zip
+# See Copyright Notice in COPYRIGHT
+# ======================================================================================================
+
+SLALOM Version 1.0 Build 1811 --------------------------------------------------------------------------
+    Revision :REV:1:20181115:
+        * CZTS input updated: spectral response added
+        * Current-Voltage characteristic treatment updated
+        * Minor changes, README.md and guide updated
+--------------------------------------------------------------------------------------------------------
+
+SLALOM Version 1.0 Build 1807 --------------------------------------------------------------------------
+    First public release
+--------------------------------------------------------------------------------------------------------
+

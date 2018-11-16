@@ -6,7 +6,6 @@
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
-# Version: 1.0 Build: 1811
 # SLALOM source code is available to download from:
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
@@ -21,6 +20,8 @@
 #                 To extend the slalomCore class, do not modify it directly but extend it by...
 #                 ...creating a new inherited class. Here, perform only performance tuning and bug fixing.
 # ------------------------------------------------------------------------------------------------------
+
+slalomVersion = 'Version: 1.0 Build: 1811'
 
 # Calculation
 import math
@@ -78,7 +79,7 @@ class slalomCore(object):
     def __init__(self, Device = None, pythonInterpreter = None, deviceSimulator = "atlas"):
         """ slalomCore constructor """
 
-        self.__version__ = "Version 1.0 Build 1710"
+        self.__version__ = slalomVersion
 
         self.pythonInterpreter = "python"
 
@@ -151,9 +152,11 @@ class slalomCore(object):
         self.inJac = False
 
         # output filenames:
-        # * these names are the same than the simulator output filenames
-        # * before last file = efficiency calculated by simulator
-        # * last file = J(V) (for efficiency calculation)
+        # * these names should be the same than the simulator output filenames
+        # * for the following three files, the position should be kept the same:
+        # * >> second file (position 1) = J(V) from V = 0 to V = VOC
+        # * >> before last file (position 6) = efficiency calculated by simulator
+        # * >> last file (position 7) = J(V) (for efficiency calculation)
         # * the output file names remain unchanged since at every 
         #   optimization a new output directory is created
         self.outputFilename = [ "simuloutput_all.log",
@@ -164,6 +167,9 @@ class slalomCore(object):
                                 "simuloutput_popt.log",
                                 "simuloutput_efficiency.log",
                                 "simuloutput_jv.log" ]
+        self.outputFilenameJVPposition = 1
+        self.outputFilenameEFFposition = 6
+        self.outputFilenameJVposition = 7
 
         # output filenames description (each output file should have a description)
         self.outputComment = [  "Voltage Sweep Data",
@@ -900,12 +906,16 @@ class slalomCore(object):
         iPoints = 0
         iPVPoints = 0
 
-        pathJV = os.path.join(self.outputDir, self.outputFilename[self.outputCount - 1])
+        pathJV = os.path.join(self.outputDir, self.outputFilename[self.outputFilenameJVposition])
         if not os.path.isfile(pathJV):
             # do not necessarily exit, since the simulator can sometimes diverge for a set of parameters choosen by the optimizer
             dispError("cannot evaluate efficiency: J-V file not found: check the simulator output file (%s)" % self.verboseFilename, doExit = False)
             return 0.0
         # end if
+
+        # :REV:1:20181115: J(V) from V = 0 to V = VOC (ave the photovoltaic part of the I(V) characteristic)
+        pathJVP = os.path.join(self.outputDir, self.outputFilename[self.outputFilenameJVPposition])
+        JVPcontent = ""
 
         try:
 
@@ -921,15 +931,17 @@ class slalomCore(object):
             bStarted = False
             bFirstV = False
 
-            fileT = open(self.outputDir + self.outputFilename[self.outputCount - 1], "r")
+            fileT = open(self.outputDir + self.outputFilename[self.outputFilenameJVposition], "r")
             for lineT in fileT:
 
                 if (lineT.startswith("#")):
+                    JVPcontent += lineT
                     continue
                 # end if
 
                 if iLine < LinesToSkip:
                     iLine += 1
+                    JVPcontent += lineT
                     continue
                 # end if
 
@@ -981,6 +993,10 @@ class slalomCore(object):
                 arrPower = np.append(arrPower, fP)
                 iPoints = len(arrVoltage)
 
+                if (fV * fJ) <= 0.0:
+                    JVPcontent += lineT
+                # end if
+
                 if (iPoints != len(arrCurrent)) or (iPoints != len(arrPower)):
                     # do not necessarily exit, since the simulator can sometimes diverge for a set of parameters choosen by the optimizer
                     dispError("cannot evaluate efficiency: J-V file content not valid: check the simulator output file (%s)" % self.verboseFilename, doExit = False)
@@ -1012,6 +1028,11 @@ class slalomCore(object):
             dispError("cannot evaluate efficiency: check the simulator output file (%s)" % self.verboseFilename, doExit = True)
             pass
         # end try
+
+        # :REV:1:20181115: J(V) from V = 0 to V = VOC
+        fileJVP = open(pathJVP, "w")
+        fileJVP.write(JVPcontent)
+        fileJVP.close()
 
         outputT = 0.0
         outputO = 0.0
@@ -1192,13 +1213,13 @@ class slalomCore(object):
 
                 # efficiency as calculated by the simulator
                 if ((bFoundJsc == True) and (bFoundVoc == True) and (bFoundPmax == True)):
-                    pathEE = os.path.join(self.outputDir, self.outputFilename[self.outputCount - 2])
+                    pathEE = os.path.join(self.outputDir, self.outputFilename[self.outputFilenameEFFposition])
                     if not os.path.isfile(pathEE):
                         dispError("cannot evaluate efficiency: '%s' file not found" % pathEE, doExit = False)
                     # end if
                     outputO = 0.0
                     try:
-                        fileO = open(self.outputDir + self.outputFilename[self.outputCount - 2], "r")
+                        fileO = open(self.outputDir + self.outputFilename[self.outputFilenameEFFposition], "r")
                         lineO = ""
                         iLT = len("Efficiency=20.123456789123456789123456789")
                         for lineOT in fileO:
@@ -1210,7 +1231,7 @@ class slalomCore(object):
                         if lineO.startswith("Efficiency=") and (len(lineO) <= iLT):
                             outputO = float(lineO.split("=")[1].rstrip(" \t\r\n").lstrip(" \t\r\n"))
                         # end if
-                        os.unlink(self.outputDir + self.outputFilename[self.outputCount - 2])
+                        os.unlink(self.outputDir + self.outputFilename[self.outputFilenameEFFposition])
                     except:
                         outputO = 0.0
                         pass

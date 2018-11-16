@@ -1,10 +1,9 @@
 # ======================================================================================================
 # SLALOM - Open-Source Solar Cell Multivariate Optimizer
 # Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
-# (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
-# (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
+# (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systémes, Metz, F-57070, France
+# (2) Laboratoire Matériaux Optiques, Photonique et Systémes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
-# Version: 1.0 Build: 1811
 # SLALOM source code is available to download from:
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
@@ -142,7 +141,7 @@ extract     name="P"   curve(v."anode", (v."anode" * 1000 * i."anode" / $DeviceA
 extract     name="Pm"  abs(min(curve(v."anode", (v."anode" * 1000 * i."anode" / $DeviceArea))))
 extract     name="FF"  100*abs($"Pm"/($"Jsc"*$"Voc")) datafile="simuloutput.log"
 # AM 1.5 power in mW/cm^2
-extract     name="Popt"       1000 * max(beam."1")  datafile="simuloutput_popt.log"
+extract     name="Popt"       1000 * max(beam."2")  datafile="simuloutput_popt.log"
 extract     name="Efficiency" (100 * $Pm / $"Popt") datafile="simuloutput.log"
 extract     name="Efficiency" (100 * $Pm / $"Popt") datafile="simuloutput_efficiency.log"
 tonyplot    "simuloutput_jvp.log"

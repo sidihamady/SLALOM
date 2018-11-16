@@ -4,7 +4,6 @@
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
-# Version: 1.0 Build: 1811
 # SLALOM source code is available to download from:
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
@@ -26,7 +25,6 @@ Linux:
     * For RedHat (or clones such as CentOS or Scientific Linux, or Fedora), numpy, scipy and matplotlib can be installed using yum:
     sudo yum install python-numpy python-scipy python-matplotlib python-matplotlib-tk python-tools
 
-
     cd /opt
     wget --no-check-certificate https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tar.xz
     tar -xvf Python-2.7.12.tar.xz
@@ -43,6 +41,6 @@ Windows:
     Two methods (at least!) to install Python and scipy/numpy/matplotlib under Windows:
         1. * Download Python: https://www.python.org/downloads/release/python-2712/
             * Choose preferebly Python 2.7.12 and install it
-            * http://www.lfd.uci.edu/~gohlke/pythonlibs/
+            * install scipy/numpy/matplotlib/tkinter modules from http://www.lfd.uci.edu/~gohlke/pythonlibs/ using pip (pip install module.whl)
         2. Download and install the Anaconda distribution: https://www.continuum.io/downloads
             * preferably pick Python 2.7 version

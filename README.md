@@ -49,7 +49,7 @@ Two methods (at least!) to install Python and scipy/numpy/matplotlib under Windo
 1.
 * Download Python: [https://www.python.org/downloads/release/python-2712/](https://www.python.org/downloads/release/python-2712/)  
 * Choose preferebly Python 2.7.12 and install it  
-* [http://www.lfd.uci.edu/~gohlke/pythonlibs/](http://www.lfd.uci.edu/~gohlke/pythonlibs/)  
+* install scipy/numpy/matplotlib/tkinter modules [http://www.lfd.uci.edu/~gohlke/pythonlibs/](http://www.lfd.uci.edu/~gohlke/pythonlibs/) using pip (pip install module.whl)  
 2. Download and install the Anaconda distribution: [https://www.anaconda.com/distribution/](https://www.anaconda.com/distribution/)
 * preferably pick Python 2.7 version
 

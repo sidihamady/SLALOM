@@ -7,7 +7,6 @@
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
-# Version: 1.0 Build: 1811
 # SLALOM source code is available to download from:
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
@@ -33,8 +32,8 @@ print('\nSLALOM - Open-Source Solar Cell Multivariate Optimizer\n'
     +   '(1) Universite de Lorraine, LMOPS, Metz, F-57070, France\n'
     +   '(2) LMOPS, CentraleSupelec, Universite Paris-Saclay, Metz, F-57070, France\n'
     +   '(*) sidi.hamady@univ-lorraine.fr\n'
-    +   'Version: 1.0 Build: 1811\n'
-    +   'SLALOM source code is available to download here: http://www.hamady.org/photovoltaics/slalom_source.zip \n'
+    +   slalomVersion + '\n'
+    +   'SLALOM source code is available to download here: https://github.com/sidihamady/SLALOM \n'
     +   'See Copyright Notice in COPYRIGHT\n')
 
 # ======================================================================================================
