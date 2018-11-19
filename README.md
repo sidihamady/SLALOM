@@ -46,10 +46,12 @@ python2.7 -m pip install --upgrade scipy
 
 Windows:
 Two methods (at least!) to install Python and scipy/numpy/matplotlib under Windows:  
+
 Method 1:  
 * Download Python: [https://www.python.org/downloads/release/python-2712/](https://www.python.org/downloads/release/python-2712/)  
 * Choose preferebly Python 2.7.12 and install it  
 * install scipy/numpy/matplotlib/tkinter modules [http://www.lfd.uci.edu/~gohlke/pythonlibs/](http://www.lfd.uci.edu/~gohlke/pythonlibs/) using pip (pip install module.whl)  
+
 Method 2:  
 Download and install the Anaconda distribution: [https://www.anaconda.com/distribution/](https://www.anaconda.com/distribution/)  
 preferably pick Python 2.7 version
