@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1><a id="SLALOM__SoLAr_CelL_Multivariate_OptiMizer_0"></a>SLALOM - SoLAr CelL Multivariate OptiMizer</h1>
+<p>Complete documentation here: <a href="https://github.com/sidihamady/SLALOM/blob/master/Guide/slalom_guide.pdf">Guide/slalom_guide.pdf</a></p>
+<p>SLALOM  is a set of open-source Python programs implementing<br>
+a rigorous mathematical methods for the optimization of solar cells using as backend<br>
+a drift-diffusion device simulator.</p>
+
+<p>It aims to be simple to use, to maintain and to extend.</p>
+
+<p>It includes a core optimizer using the well tested robust mathematical methods,<br>
+a set of user interface utilities and some complete and working examples easily adaptable to<br>
+new solar cell technologies.</p>
+
+<p>SLALOM uses, as device simulator, the Silvaco© Atlas tool.<br>
+It can be easily extended to use any simulator that have a standard input format and a command line interface.</p>
+
+<p>SLALOM source code is available to download from:<br>
+<a href="https://github.com/sidihamady/SLALOM">https://github.com/sidihamady/SLALOM</a><br>
+<a href="https://hal.archives-ouvertes.fr/hal-01897934">https://hal.archives-ouvertes.fr/hal-01897934</a><br>
+<a href="http://www.hamady.org/photovoltaics/slalom_source.zip">http://www.hamady.org/photovoltaics/slalom_source.zip</a></p>
+
+<p>SLALOM requirements:</p>
+<ul>
+<li>Python version 2.7.x or later</li>
+<li>numpy version 1.5 or later</li>
+<li>scipy version 0.13.1 or later</li>
+<li>matplotlib version 1.3.x or later</li>
+<li>tkinter 8.5 or later (required only for the GUI monitor)</li>
+</ul>
+<p>Linux:</p>
+<ul>
+<li>Python is already installed with almost any Linux distribution.</li>
+<li>For RedHat (or clones such as CentOS or Scientific Linux, or Fedora), numpy, scipy and matplotlib can be installed using yum:</li>
+</ul>
+<pre><code>sudo yum install python-numpy python-scipy python-matplotlib python-matplotlib-tk python-tools
+cd /opt
+wget --no-check-certificate https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tar.xz
+tar -xvf Python-2.7.12.tar.xz
+cd Python-2.7.12
+./configure --prefix=/usr/local
+make &amp;&amp; make altinstall
+wget https://bootstrap.pypa.io/get-pip.py
+python2.7 get-pip.py
+python2.7 -m pip install --upgrade numpy
+python2.7 -m pip install --upgrade scipy
+</code></pre>
+<p>Windows:<br>
+Two methods (at least!) to install Python and scipy/numpy/matplotlib under Windows:</p>
+<p>Method 1:</p>
+<ul>
+<li>Download Python: <a href="https://www.python.org/downloads/release/python-2712/">https://www.python.org/downloads/release/python-2712/</a></li>
+<li>Choose preferably Python 2.7.12 and install it</li>
+<li>install scipy/numpy/matplotlib/tkinter modules <a href="http://www.lfd.uci.edu/~gohlke/pythonlibs/">http://www.lfd.uci.edu/~gohlke/pythonlibs/</a> using pip (pip install module.whl)</li>
+</ul>
+<p>Method 2:<br>
+Download and install the Anaconda distribution: <a href="https://www.anaconda.com/distribution/">https://www.anaconda.com/distribution/</a><br>
+preferably pick Python 2.7 version</p>
+<p>See <a href="https://github.com/sidihamady/SLALOM/blob/master/Guide/slalom_guide.pdf">Guide/slalom_guide.pdf</a> for a complete guide.</p>
+<p><img src="screenshot1.png" alt="SLALOM screenshot"></p>
+<p><img src="screenshot2.png" alt="SLALOM screenshot"></p>
+<p><img src="screenshot3.png" alt="SLALOM screenshot"></p>
+<p><img src="screenshot4.png" alt="SLALOM screenshot"></p>
+
+</body>
+</html>

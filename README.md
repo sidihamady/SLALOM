@@ -49,7 +49,7 @@ Two methods (at least!) to install Python and scipy/numpy/matplotlib under Windo
 
 Method 1:  
 * Download Python: [https://www.python.org/downloads/release/python-2712/](https://www.python.org/downloads/release/python-2712/)  
-* Choose preferebly Python 2.7.12 and install it  
+* Choose preferably Python 2.7.12 and install it  
 * install scipy/numpy/matplotlib/tkinter modules [http://www.lfd.uci.edu/~gohlke/pythonlibs/](http://www.lfd.uci.edu/~gohlke/pythonlibs/) using pip (pip install module.whl)  
 
 Method 2:  
