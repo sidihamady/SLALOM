@@ -1,13 +1,14 @@
 # ======================================================================================================
 # SLALOM - Open-Source Solar Cell Multivariate Optimizer
-# Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
-# (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systémes, Metz, F-57070, France
-# (2) Laboratoire Matériaux Optiques, Photonique et Systémes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
+# Copyright(C) 2012-2019 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
+# (1) UniversitÃ© de Lorraine, Laboratoire MatÃ©riaux Optiques, Photonique et SystÃ©mes, Metz, F-57070, France
+# (2) Laboratoire MatÃ©riaux Optiques, Photonique et SystÃ©mes, CentraleSupÃ©lec, UniversitÃ© Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
 # SLALOM source code is available to download from:
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
 # http ://www.hamady.org/photovoltaics/slalom_source.zip
+# Cite as: S Ould Saad Hamady and N Fressengeas, EPJ Photovoltaics, 9:13, 2018.
 # See Copyright Notice in COPYRIGHT
 # ======================================================================================================
 
@@ -33,7 +34,7 @@ set CZTSLayerDop=1e+16
 set Taun=1e-7
 set Taup=1e-7
 
-set voltageStart=-1.5
+set voltageStart=-1.4
 set voltageEnd=0.1
 set voltageStep=0.01
 
@@ -52,8 +53,8 @@ set BeamXmin=0.0
 set BeamXmax=$DeviceDimX
 set BeamAngle=90.0
 set BeamWstart=0.3
-set BeamWend=3.0
-set BeamWnum=1000
+set BeamWend=1.0
+set BeamWnum=201
 set BeamWstep=($BeamWend-$BeamWstart)/($BeamWnum-1)
 set BeamDblPrecision=1e-13
 
@@ -100,12 +101,12 @@ method      newton maxtraps=10 itlimit=100
 # :REV:1:20181115: add spectral response
 #<START-SpectralResponse>
 # the solar cell spectral response at 0 V
-beam        number=1 angle=$BeamAngle y.origin=$BeamYorigin x.origin=$BeamXorigin xmin=$BeamXmin xmax=$BeamXmax
-solve       init
-solve       b1=0.0
-solve       previous vanode=0.000
-log         outfile="simuloutput_spectralresponse.log"
-solve       b1=1.0 lambda=$BeamWstart wstep=$BeamWstep wfinal=$BeamWend
+#beam        number=1 angle=$BeamAngle y.origin=$BeamYorigin x.origin=$BeamXorigin xmin=$BeamXmin xmax=$BeamXmax
+#solve       init
+#solve       b1=0.0
+#solve       previous vanode=0.000
+#log         outfile="simuloutput_spectralresponse.log"
+#solve       b1=1.0 lambda=$BeamWstart wstep=$BeamWstep wfinal=$BeamWend
 #<END-SpectralResponse>
 
 #<START-JVChar>
@@ -123,12 +124,12 @@ go atlas
 # (In)External Quantum Efficiency, Photovoltaic parameters (JSC, VOC, FF and efficiency)
 
 # :REV:1:20181115: add spectral response
-extract     init infile="simuloutput_spectralresponse.log"
-extract     name="EQE" curve(elect."optical wavelength", (i."anode")/(elect."source photo current" + $BeamDblPrecision), x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_spectralresponse_eqe.log"
-extract     name="IQE" curve(elect."optical wavelength", (i."anode")/(elect."available photo current" + $BeamDblPrecision), x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_spectralresponse_iqe.log"
-extract     name="SPC" curve(elect."optical wavelength", elect."source photo current", x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_photocurrent_source.log"
-extract     name="APC" curve(elect."optical wavelength", elect."available photo current", x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_photocurrent_available.log"
-tonyplot    "simuloutput_spectralresponse_eqe.log" -overlay "simuloutput_spectralresponse_iqe.log"
+#extract     init infile="simuloutput_spectralresponse.log"
+#extract     name="EQE" curve(elect."optical wavelength", (i."anode")/(elect."source photo current" + $BeamDblPrecision), x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_spectralresponse_eqe.log"
+#extract     name="IQE" curve(elect."optical wavelength", (i."anode")/(elect."available photo current" + $BeamDblPrecision), x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_spectralresponse_iqe.log"
+#extract     name="SPC" curve(elect."optical wavelength", elect."source photo current", x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_photocurrent_source.log"
+#extract     name="APC" curve(elect."optical wavelength", elect."available photo current", x.min=$BeamWstart x.max=$BeamWend) outfile="simuloutput_photocurrent_available.log"
+#tonyplot    "simuloutput_spectralresponse_eqe.log" -overlay "simuloutput_spectralresponse_iqe.log"
 
 # :TODO:1:20181115: the J-V file saved by Deckbuild need to be treated in the Python code to have better control
 extract     init infile="simuloutput_all.log"

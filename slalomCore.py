@@ -2,7 +2,7 @@
 
 # ======================================================================================================
 # SLALOM - Open-Source Solar Cell Multivariate Optimizer
-# Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
+# Copyright(C) 2012-2019 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
@@ -10,6 +10,7 @@
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
 # http://www.hamady.org/photovoltaics/slalom_source.zip
+# Cite as: S Ould Saad Hamady and N Fressengeas, EPJ Photovoltaics, 9:13, 2018.
 # See Copyright Notice in COPYRIGHT
 # ======================================================================================================
 
@@ -21,12 +22,14 @@
 #                 ...creating a new inherited class. Here, perform only performance tuning and bug fixing.
 # ------------------------------------------------------------------------------------------------------
 
-slalomVersion = 'Version: 1.0 Build: 1811'
+slalomVersion = 'Version: 1.2 Build: 1904'
 
 # Calculation
 import math
 import numpy as np
 from scipy import optimize, interpolate, signal
+from Bayes import BayesianOptimization
+from Bayes import UtilityFunction
 import random
 
 # Control
@@ -92,10 +95,12 @@ class slalomCore(object):
         self.isInputChecked = False
 
         self.optimType = ""
-        self.minimizeMethodList = ["L-BFGS-B", "SLSQP"]
-        self.minimizeMethod = ""
+        self.minimizeMethodList = ["L-BFGS-B", "SLSQP", "Bayes"]
+        self.minimizeMethod = "Bayes"
+        self.maxIter = 100
         self.isBound = True
         self.tolerance = 1e-3
+        self.ftolerance = 0.005
         self.jaceps = np.array([])
 
         # Optimization cache
@@ -132,7 +137,6 @@ class slalomCore(object):
         self.paramNatural = np.array([])
         self.paramCountTotal = 0
         self.paramFormatOutput = ""
-        self.maxIter = 0
         self.outputOptimized = 0.0
         self.outputOptimizedx = 0.0
         self.outputOptimizedy = 0.0
@@ -384,7 +388,7 @@ class slalomCore(object):
 
     # end printTime
 
-    def finish(self, errorOccured=True, userStopped=True, x=None, success=None, message=None, nit=None):
+    def finish(self, errorOccured=True, userStopped=True, x=None, success=None, message=None, nit=None, nlfev=None, xl=None, funl=None):
         """ print out results at the optimization end """
 
         try:
@@ -419,8 +423,10 @@ class slalomCore(object):
                             xt[ii] = math.pow(10.0, (x[ii] * math.log10(self.paramNorm[ii])))
                         else:
                             xt[ii] = x[ii] * self.paramNorm[ii]
+                        # end if
+                    # end for
                     strT += "\n---------------------------------------------------------------\n"
-                    strT += "Optimization function" + "(" + self.minimizeMethod + ")" + " output:\n"
+                    strT += "Optimization function (" + self.minimizeMethod + ") output:\n"
 
                     strT += "Parameter:\t"
                     for ii in range(0, self.paramCount - 1):
@@ -444,6 +450,57 @@ class slalomCore(object):
                     strT += "\nmessage: " + str(message) + "\n"
                     strT += "\nevaluations: " + str(self.funcCounter)
                     strT += "\n---------------------------------------------------------------\n"
+                # end if
+
+                if (xl is not None) and (funl is not None) and (success is not None) and (message is not None):
+                    nxl = len(xl)
+                    nfunl = len(funl)
+                    if (nxl == nfunl):
+                        if (nxl > 10):
+                            nxl = 10
+                            nfunl = 10
+                        # end if
+                        ll = 0
+                        for xll in xl:
+                            effl = 100.0 * (1.0 - funl[ll])
+                            ll = ll + 1
+                            if (effl < 0.0) or (effl > 90.0):
+                                # should never happen
+                                continue
+                            # end if
+                            xt = np.zeros(self.paramCount)
+                            for ii in range(0, self.paramCount):
+                                if self.paramLogscale[ii]:
+                                    xt[ii] = math.pow(10.0, (xll[ii] * math.log10(self.paramNorm[ii])))
+                                else:
+                                    xt[ii] = xll[ii] * self.paramNorm[ii]
+                                # end if
+                            # end for
+                            strT += "\n---------------------------------------------------------------\n"
+                            strT += "Optimization function (" + self.minimizeMethod + (") local output #%d:\n" % ll)
+
+                            strT += "Parameter:\t"
+                            for ii in range(0, self.paramCount - 1):
+                                strT += self.paramName[ii] + "\t"
+                            # end for
+                            strT += self.paramName[self.paramCount - 1] + "\n"
+
+                            strT += "xl (natural):\t"
+                            for ii in range(0, self.paramCount - 1):
+                                strT += (self.paramFormat[ii] % xt[ii]) + "\t"
+                            # end for
+                            strT += (self.paramFormat[self.paramCount - 1] % xt[self.paramCount - 1]) + "\n"
+
+                            strT += "xl (normalized):\t"
+                            for ii in range(0, self.paramCount - 1):
+                                strT += (self.paramFormatNormalized[ii] % xll[ii]) + "\t"
+                            # end for
+                            strT += (self.paramFormatNormalized[self.paramCount - 1] % xll[self.paramCount - 1]) + "\n"
+
+                            strT += "\nefficiency: %06.3f %%" % effl
+                            strT += "\n---------------------------------------------------------------\n"
+                        # end if
+                    # end if
                 # end if
 
                 self.log(strT)
@@ -675,8 +732,45 @@ class slalomCore(object):
         return self.weightFunc[idx]
     # end if
 
+    def optimizeFuncBayesian(self, **paramNormalizedBayesian):
+        """ the optimizer maximization function for the Bayesian method """
+        paramCount = len(paramNormalizedBayesian)
+        if (self.paramCount != paramCount):
+            # should never happen
+            try:
+                self.finish(errorOccured=True, userStopped=True)
+            except:
+                self.isRunning = False
+                sys.exit(1)
+            # end try
+            return 0.0
+        # end if
+        paramNormalized = np.zeros(self.paramCount)
+        for paramT in paramNormalizedBayesian:
+            for ii in range(0, self.paramCount):
+                if (self.paramName[ii] == paramT):
+                    paramNormalized[ii] = float(paramNormalizedBayesian[paramT])
+                    break
+                # end if
+            # end for
+        # end for
+        return self.optimizeFunc(paramNormalized)
+    # end optimizeFuncBayesian
+
     def optimizeFunc(self, paramNormalized):
         """ the optimizer minimization function """
+
+        paramCount = len(paramNormalized)
+        if (self.paramCount != paramCount):
+            # should never happen
+            try:
+                self.finish(errorOccured=True, userStopped=True)
+            except:
+                self.isRunning = False
+                sys.exit(1)
+            # end try
+            return 0.0
+        # end if
 
         bShowOutput = ((self.inJac == False) or (self.optimType == "Brute"))
 
@@ -721,7 +815,7 @@ class slalomCore(object):
             if self.guessParam:
                 strT = "\n-------------------- GUESS " + (self.counterFormat.format(self.optimCounter)) + " RUNNING -----------------------\n"
             else:
-                strT = "\n----------------- OPTIMIZATION " + (self.counterFormat.format(self.optimCounter)) + " RUNNING -------------------\n"
+                strT = "\n----------------- OPTIMIZATION " + (self.counterFormat.format(self.optimCounter)) + " RUNNING ---------------------\n"
             # end if
 
             strT += self.title + ": Optimization (" + self.optimType
@@ -897,7 +991,7 @@ class slalomCore(object):
             return 0.0
         # end if
 
-        # Calculate the efficiency (Very important to be as precise for the optimization algorithm)
+        # Calculate the efficiency (Very important to be precise for the optimization algorithm)
         LinesToSkip = 4
         arrVoltage = np.array([])
         arrCurrent = np.array([])
@@ -913,7 +1007,7 @@ class slalomCore(object):
             return 0.0
         # end if
 
-        # :REV:1:20181115: J(V) from V = 0 to V = VOC (ave the photovoltaic part of the I(V) characteristic)
+        # :REV:1:20181115: J(V) from V = 0 to V = VOC (the photovoltaic part of the I(V) characteristic)
         pathJVP = os.path.join(self.outputDir, self.outputFilename[self.outputFilenameJVPposition])
         JVPcontent = ""
 
@@ -1178,17 +1272,20 @@ class slalomCore(object):
 
                 if ((bFoundJsc == True) and (bFoundVoc == True) and (bFoundPmax == True)):
                     fFF = 100.0 * Pmax / math.fabs(fJsc * fVoc)
+                    if (fFF >= 95.0):
+                        bFoundPmax = False
+                    # end if
                 # end if
 
                 if ((bFoundJsc == False) or (bFoundVoc == False) or (bFoundPmax == False)):
                     strT = "Cannot evaluate efficiency: "
                     if bFoundJsc:
-                        strT += ("  JSC = %.5f mA/cm2" % fJsc)
+                        strT += ("  JSC = %.5f mA/cm2" % math.fabs(fJsc))
                     else:
                         strT += "  JSC not found"
                     # end if
                     if bFoundVoc:
-                        strT += ("  VOC = %.5f V" % fVoc)
+                        strT += ("  VOC = %.5f V" % math.fabs(fVoc))
                     else:
                         strT += "  VOC not found"
                     # end if
@@ -1292,9 +1389,9 @@ class slalomCore(object):
 
         if (bShowOutput == True):
             if self.guessParam:
-                strT = "\n---------------------- GUESS " + (self.counterFormat.format(self.optimCounter)) + " DONE ------------------------\n"
+                strT = "\n---------------------- GUESS " + (self.counterFormat.format(self.optimCounter)) + " DONE --------------------------\n"
             else:
-                strT = "\n------------------- OPTIMIZATION " + (self.counterFormat.format(self.optimCounter)) + " DONE --------------------\n"
+                strT = "\n------------------- OPTIMIZATION " + (self.counterFormat.format(self.optimCounter)) + " DONE ----------------------\n"
             # end if
 
             strT += self.title + ": Optimization (" + self.optimType
@@ -1333,7 +1430,7 @@ class slalomCore(object):
             strT += (self.paramFormatNormalized[self.paramCount - 1] % paramNormalized[self.paramCount - 1])
 
             strT += "\nPRESENT Efficiency: " + ("%g %%" % outputT) + " (Simulator: " + ("%g %%" % outputO) + ")"
-            strT += "\nPRESENT " + ("FF = %08.5f %%" % fFF) + (" ; Jsc = %08.5f mA/cm2" % fJsc) + (" ; Voc = %08.5f V" % fVoc)
+            strT += "\nPRESENT " + ("FF = %08.5f %%" % fFF) + (" ; Jsc = %08.5f mA/cm2" % math.fabs(fJsc)) + (" ; Voc = %08.5f V" % math.fabs(fVoc))
             strT += "\nMAXIMUM Efficiency: %g %%" % self.outputOptimized
             strT += "\nThis run duration: " + self.printTime(float(durationT)) + " (mean: " + self.printTime(self.delayMean) + ")"
             strT += "\nElapsed time: " + self.printTime(float(self.elapsedTime))
@@ -1360,7 +1457,7 @@ class slalomCore(object):
                     strT += (self.paramFormat[ii] % self.paramNatural[ii]) + "\t"
                 # end for
 
-                strT += ("%08.5f\t" % math.fabs(fJm)) + ("%08.5f\t" % fVm) + ("%08.5f\t" % fFF) + ("%08.5f\t" % fJsc) + ("%08.5f\t" % fVoc) + ("%08.5f" % outputT) + "\n"
+                strT += ("%08.5f\t" % math.fabs(fJm)) + ("%08.5f\t" % fVm) + ("%08.5f\t" % fFF) + ("%08.5f\t" % math.fabs(fJsc)) + ("%08.5f\t" % math.fabs(fVoc)) + ("%08.5f" % outputT) + "\n"
                 fileOptim = open(self.outputDir + self.outputOptimizedFilename, "a")
                 fileOptim.write(strT)
                 fileOptim.close()
@@ -1396,7 +1493,12 @@ class slalomCore(object):
                 # end if
             # end if
 
-            tOutput = (1.0 - (outputT / 100.0))
+            # all methods minimize except the Bayesian method that maximizes
+            if (self.minimizeMethod == "Bayes"):
+                tOutput = outputT
+            else:
+                tOutput = (1.0 - (outputT / 100.0))
+            # end if
 
             if (len(self.lastOutput) >= self.lastParamLimit):
                 self.lastOutput.pop(0)
@@ -1596,23 +1698,25 @@ class slalomCore(object):
         strT += dateStr
         if self.optimType == "Optim":
             strT += ("\n# With tolerance = %g" % self.tolerance)
-            strT += (" and jaceps = [ %.5f" % self.jaceps[0])
-            if self.paramCount > 1:
-                strT += ("  %.5f" % self.jaceps[1])
+            if (self.minimizeMethod != "Bayes"):
+                strT += (" and jaceps = [ %.5f" % self.jaceps[0])
+                if self.paramCount > 1:
+                    strT += ("  %.5f" % self.jaceps[1])
+                # end if
+                if self.paramCount > 2:
+                    strT += ("  %.5f" % self.jaceps[2])
+                # end if
+                if self.paramCount > 3:
+                    strT += ("  %.5f" % self.jaceps[3])
+                # end if
+                if self.paramCount > 4:
+                    strT += ("  %.5f" % self.jaceps[4])
+                # end if
+                if self.paramCount > 5:
+                    strT += " ..."
+                # end if
+                strT += " ]"
             # end if
-            if self.paramCount > 2:
-                strT += ("  %.5f" % self.jaceps[2])
-            # end if
-            if self.paramCount > 3:
-                strT += ("  %.5f" % self.jaceps[3])
-            # end if
-            if self.paramCount > 4:
-                strT += ("  %.5f" % self.jaceps[4])
-            # end if
-            if self.paramCount > 5:
-                strT += " ..."
-            # end if
-            strT += " ]"
             if self.paramWeight and self.isBound:
                 strT += " Weighted"
             # end if
@@ -1785,17 +1889,63 @@ class slalomCore(object):
         outSuccess = None
         outMessage = None
         outNit = None
+        outFun = None
+        outNFev = None
+        outNJev = None
+        outNHev = None
+        outNLFev = None
+        outXl = None
+        outFunl = None
 
         # Choose the initial values
         paramNormalized0 = self.guess()
 
         if self.isBound:
             try:
-                outResult = optimize.minimize(self.optimizeFunc, paramNormalized0, method=self.minimizeMethod, jac=self.getOptimizeJac(self.optimizeFunc), bounds=self.paramBounds, tol=self.tolerance, options={ 'eps': tEps, 'maxiter': self.maxIter, 'disp': False, 'ftol': self.tolerance })
-                outX = outResult.x
-                outSuccess = outResult.success
-                outMessage = outResult.message
-                outNit = outResult.nit
+                self.isBound = True
+                if (self.minimizeMethod == "Bayes"):
+                    BayesianBbounds = {}
+                    for ii in range(0, self.paramCount):
+                        BayesianBbounds[self.paramName[ii]] = self.paramBounds[ii]
+                    # end for
+                    BayesianOptimizer = BayesianOptimization(
+                        f=self.optimizeFuncBayesian,
+                        pbounds=BayesianBbounds,
+                        verbose=0
+                    )
+                    BayesianOptimizer.maximize(
+                        init_points=self.paramCount if (self.paramCount <= 5) else 5,
+                        n_iter=self.maxIter,
+                    )
+                    outFun = BayesianOptimizer.max['target']
+                    params = BayesianOptimizer.max['params']
+                    outX = np.array([])
+                    for ii in range(0, len(params)):
+                        outX = np.append(outX, params[self.paramName[ii]])
+                    # end for
+                    outSuccess = True
+                    outMessage = 'Done.'
+                    outNit = self.maxIter
+                else:
+                    outResult = optimize.minimize(self.optimizeFunc, paramNormalized0, method=self.minimizeMethod, jac=self.getOptimizeJac(self.optimizeFunc), bounds=self.paramBounds, tol=self.tolerance, options={ 'eps': tEps, 'maxiter': self.maxIter, 'disp': False, 'ftol': self.tolerance })
+                # end if
+                try:
+                    if (self.minimizeMethod != "Bayes"):
+                        outX = outResult.x
+                        outSuccess = outResult.success
+                        outMessage = outResult.message
+                        outNit = outResult.nit
+                        outFun = outResult.fun
+                        outNFev = outResult.nfev
+                        outNJev = outResult.njev
+                        outNHev = outResult.nhev
+                        outNLFev = outResult.nlfev
+                        outXl = outResult.xl
+                        outFunl = outResult.funl
+                    # end if
+                except:
+                    pass
+                # end try
             except Exception as excT:
                 # catch only Exception (since sys.exit raise BaseException)
                 if self.stoppedDone is False:
@@ -1816,7 +1966,7 @@ class slalomCore(object):
             # end try
         # end if
 
-        self.finish(errorOccured=False, userStopped=False, x=outX, success=outSuccess, message=outMessage, nit=outNit)
+        self.finish(errorOccured=False, userStopped=False, x=outX, success=outSuccess, message=outMessage, nit=outNit, nlfev=outNLFev, xl=outXl, funl=outFunl)
 
         return True
 
@@ -1993,10 +2143,10 @@ class slalomCore(object):
         return self.minimizeMethod
     # end getMinimizeMethod
 
-    def setMinimizeMethod(self, minimizeMethod, maxIter = 100, tolerance = 1e-3, optimPoints = 51):
+    def setMinimizeMethod(self, minimizeMethod, maxIter = 10, tolerance = 1e-3, optimPoints = 51):
         """ set the optimization method ('L-BFGS-B' or 'SLSQP') """
         
-        if (maxIter >= 2) and (maxIter <= 1024):
+        if (maxIter >= 1) and (maxIter <= 1024):
             self.maxIter = maxIter
         # end if
 
@@ -2017,7 +2167,7 @@ class slalomCore(object):
 
         if minimizeMethod in self.minimizeMethodList:
             self.minimizeMethod = minimizeMethod
-            if (self.minimizeMethod == "L-BFGS-B") or (self.minimizeMethod == "SLSQP"):
+            if (self.minimizeMethod == "L-BFGS-B") or (self.minimizeMethod == "SLSQP") or (self.minimizeMethod == "Bayes"):
                 self.isBound = True
             else:
                 self.isBound = False

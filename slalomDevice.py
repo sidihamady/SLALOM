@@ -2,7 +2,7 @@
 
 # ======================================================================================================
 # SLALOM - Open-Source Solar Cell Multivariate Optimizer
-# Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
+# Copyright(C) 2012-2019 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
@@ -10,6 +10,7 @@
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
 # http://www.hamady.org/photovoltaics/slalom_source.zip
+# Cite as: S Ould Saad Hamady and N Fressengeas, EPJ Photovoltaics, 9:13, 2018.
 # See Copyright Notice in COPYRIGHT
 # ======================================================================================================
 
@@ -127,9 +128,9 @@ class slalomDevice(object):
             # Normalization value for each parameter
             self.paramNorm = np.array([1.000, 1e17, 1.000, 1e17, 1.00])
             # Parameters range limit (Start)
-            self.paramStart = np.array([0.001, 1e13, 0.001, 1e13, 0.05])
+            self.paramStart = np.array([0.01, 1e14, 0.01, 1e14, 0.01])
             # Parameters range limit (End)
-            self.paramEnd = np.array([2.000, 1e20, 2.000, 1e20, 0.95])
+            self.paramEnd = np.array([5.000, 1e20, 5.000, 1e20, 0.99])
             # Parameters initial values (used as a starting point or when optimType is set to "Snap")
             # should be in the [paramStart, paramEnd] range
             self.paramInit = np.array([0.100, 1e17, 0.500, 1e15, 0.56])
@@ -137,6 +138,41 @@ class slalomDevice(object):
             self.paramPoints = [5, 5, 5, 5, 1]
             # Parameters variation type (True for logarithmic variation (e.g. for doping), and False for linear)
             self.paramLogscale = [False, True, False, True, False]
+            self.paramWeight = False
+
+        elif self.deviceType == "InGaN_Schottky":
+            # on a server with 8-core Xeon processors and 32 GB of RAM...
+            # one simulation takes up to five minutes, with the given input and parameters,
+            # strongly depending on numerical parameters (mesh, propagation, solver...) and device parameters.
+            # Deckbuild input filename
+            self.inputFilename = "InGaN_Schottky.in"
+            # Device description
+            self.mainTitle = "Schottky InGaN PV Cell"
+            # Output directory
+            self.outputDir = self.currentDir + "output" + self.dirSepChar + self.deviceType + self.dirSepChar
+            # Parameters name, as defined is the Deckbuild input
+            self.paramName = ["Workfunction", "NLayerThick", "NLayerDop", "AlloyComp"]
+            # Parameters unit
+            self.paramUnit = ["eV", "um", "1/cm3", ""]
+            # Parameters format string (e.g. for doping use "%.6e")
+            self.paramFormat = ["%.8f", "%.8f", "%.6e", "%.8f"]
+            # Parameters short format string for console output (e.g. for doping use "%.4e")
+            self.paramFormatShort = ["%.6f", "%.6f", "%.4e", "%.6f"]
+            # Normalized parameters format string for console output
+            self.paramFormatNormalized = ["%.8f", "%.8f", "%.8f", "%.8f"]
+            # Normalization value for each parameter
+            self.paramNorm = np.array([1.000, 1.000, 1e17, 1.00])
+            # Parameters range limit (Start)
+            self.paramStart = np.array([5.0, 0.01, 1e14, 0.01])
+            # Parameters range limit (End)
+            self.paramEnd = np.array([7.0, 5.000, 1e20, 0.99])
+            # Parameters initial values (used as a starting point or when optimType is set to "Snap")
+            # should be in the [paramStart, paramEnd] range
+            self.paramInit = np.array([5.1, 0.500, 1e15, 0.56])
+            # Parameters number of points (used as when optimType is set to "Brute")
+            self.paramPoints = [5, 5, 5, 1]
+            # Parameters variation type (True for logarithmic variation (e.g. for doping), and False for linear)
+            self.paramLogscale = [False, False, True, False]
             self.paramWeight = False
 
         elif self.deviceType == "CZTS":
@@ -162,9 +198,9 @@ class slalomDevice(object):
             # Normalization value for each parameter
             self.paramNorm = np.array([1.000, 1e17])
             # Parameters range limit (Start)
-            self.paramStart = np.array([0.100, 1e15])
+            self.paramStart = np.array([0.100, 1e14])
             # Parameters range limit (End)
-            self.paramEnd = np.array([3.000, 1e18])
+            self.paramEnd = np.array([5.000, 1e19])
             # Parameters initial values (used as a starting point or when optimType is set to "Snap")
             # should be in the [paramStart, paramEnd] range
             self.paramInit = np.array([0.500, 1e17])

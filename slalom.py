@@ -3,7 +3,7 @@
 
 # ======================================================================================================
 # SLALOM - Open-Source Solar Cell Multivariate Optimizer
-# Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*) and Nicolas FRESSENGEAS (1,2). All rights reserved.
+# Copyright(C) 2012-2019 Sidi OULD SAAD HAMADY (1,2,*) and Nicolas FRESSENGEAS (1,2). All rights reserved.
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
@@ -11,6 +11,7 @@
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
 # http://www.hamady.org/photovoltaics/slalom_source.zip
+# Cite as: S Ould Saad Hamady and N Fressengeas, EPJ Photovoltaics, 9:13, 2018.
 # See Copyright Notice in COPYRIGHT
 # ======================================================================================================
 
@@ -28,12 +29,13 @@ from slalomDevice import *
 import getopt
 
 print('\nSLALOM - Open-Source Solar Cell Multivariate Optimizer\n'
-    +   'Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.\n'
+    +   'Copyright(C) 2012-2019 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.\n'
     +   '(1) Universite de Lorraine, LMOPS, Metz, F-57070, France\n'
     +   '(2) LMOPS, CentraleSupelec, Universite Paris-Saclay, Metz, F-57070, France\n'
     +   '(*) sidi.hamady@univ-lorraine.fr\n'
     +   slalomVersion + '\n'
     +   'SLALOM source code is available to download here: https://github.com/sidihamady/SLALOM \n'
+    +   'Cite as: S Ould Saad Hamady and N Fressengeas, EPJ Photovoltaics, 9:13, 2018. \n'
     +   'See Copyright Notice in COPYRIGHT\n')
 
 # ======================================================================================================
@@ -68,13 +70,16 @@ remoteSSHhost = ""#"sidi@efprimix"
 # The devices are defined in the slalomDevice class.
 # Set deviceType to a predefined device (included in slalomDevice.py)...
 # ...or set it to None and define the parameters in the optimizer GUI.
-deviceType = "InGaN_PN"
+deviceType = "InGaN_Schottky"
 
 # The optimization mode: "Brute" (brute force), "Optim" (optimization) or "Snap" (one point)
 optimType = "Optim"
 
-# The optimization method: "L-BFGS-B" or "SLSQP"
+# The optimization method: "L-BFGS-B", "SLSQP" or "Bayes"
 minimizeMethod = "SLSQP"
+
+# The maximum number of iterations
+maxIter = 100
 
 # Set to True to start the optimization with a random point
 randomInit = False
@@ -630,8 +635,8 @@ else:
         Optimizer = slalomCore(Device, pythonInterpreter, deviceSimulator)
 
         if optimType == "Optim":
-            # optimPoints is used to approximate the jacobian. If increased, the optimisation time will dramatically increase. The default value is 51 and the maximum value is 201.
-            Optimizer.setMinimizeMethod(minimizeMethod, maxIter = 100, tolerance = 1e-3, optimPoints = 21)
+            # optimPoints is used to approximate the jacobian. If increased, the optimisation time will dramatically increase. The default value is 21 and the maximum value is 201.
+            Optimizer.setMinimizeMethod(minimizeMethod, maxIter = maxIter, tolerance = 1e-3, optimPoints = 21)
         # end if
 
         # set enableMonitor to True to start the optimizer monitor

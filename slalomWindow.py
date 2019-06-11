@@ -2,7 +2,7 @@
 
 # ======================================================================================================
 # SLALOM - Open-Source Solar Cell Multivariate Optimizer
-# Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
+# Copyright(C) 2012-2019 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
 # (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 # (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 # (*) sidi.hamady@univ-lorraine.fr
@@ -10,6 +10,7 @@
 # https://github.com/sidihamady/SLALOM
 # https://hal.archives-ouvertes.fr/hal-01897934
 # http://www.hamady.org/photovoltaics/slalom_source.zip
+# Cite as: S Ould Saad Hamady and N Fressengeas, EPJ Photovoltaics, 9:13, 2018.
 # See Copyright Notice in COPYRIGHT
 # ======================================================================================================
 
@@ -685,7 +686,7 @@ class OptimizerReport(Tk.Frame):
             # end if
         # end for
 
-        if (self.plot is not None):
+        if (self.plot is not None) and (self.count > 0):
             self.plot.relim()
             self.plot.autoscale()
             if (self.index == 1):
@@ -1137,6 +1138,17 @@ class slalomWindow(object):
         # end if
 
         self.onUpdateData(force = True)
+
+        try:
+            self.plot[0].set_xlim([0.0, 1.0])
+            self.plot[0].set_ylim([0.0, 1.0])
+            self.plot[1].set_xlim([0.0, 1.0])
+            self.plot[1].set_ylim([0.0, 1.0])
+            self.plot[2].set_xlim([0.0, 1.0])
+            self.plot[2].set_ylim([0.0, 1.0])
+        except:
+            pass
+        # end try
 
         self.root.mainloop()
 
@@ -1873,7 +1885,7 @@ class slalomWindow(object):
         # end if
         if dataNV:
             tkMessageBox.showwarning("SLALOM", "Report data files not found", parent=self.root)
-            pass
+            return
         # end if
 
         try:
@@ -2439,10 +2451,9 @@ class slalomWindow(object):
             strTX = ""
             if ((self.iPoints >= 1) and (self.efficiencyMin <= self.efficiencyMax)
                 and (self.efficiencyMin <= self.efficiencyMax)):
-                strTX = ("Efficiency: min = " + ("%06.3f" % self.efficiencyMin)
-                    + " ; max = " + ("%06.3f" % self.efficiencyMax)
-                    + " ; selected = " + ("%06.3f" % self.efficiencySel)
-                    + ">")
+                strTX = ("Efficiency: min = " + ("%06.3f %%" % self.efficiencyMin)
+                    + " ; max = " + ("%06.3f %%" % self.efficiencyMax)
+                    + " ; selected = " + ("%06.3f %%" % self.efficiencySel))
             # end if
             self.plot[self.count - 1].set_title(strTX, fontsize=self.fontsize, color=self.linecolor[self.count - 1])
         except:
@@ -2709,13 +2720,14 @@ class slalomWindow(object):
     def onAbout(self):
         tkMessageBox.showinfo("SLALOM",
                              ("SLALOM - Open-Source Solar Cell Multivariate Optimizer\n" +
-                              "Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2).\n" +
+                              "Copyright(C) 2012-2019 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2).\n" +
                               "All rights reserved.\n" +
                               "(1) Université de Lorraine, LMOPS, Metz, F-57070, France\n" +
                               "(2) LMOPS, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France\n" +
                               "(*) sidi.hamady@univ-lorraine.fr\n" +
                               slalomVersion + "\n" +
                               "The user manual is in the Guide directory\n" +
+                              "Cite as: S Ould Saad Hamady and N Fressengeas, EPJ Photovoltaics, 9:13, 2018\n" +
                               "See Copyright Notice in COPYRIGHT"),
                               parent=self.root)
     # end onAbout

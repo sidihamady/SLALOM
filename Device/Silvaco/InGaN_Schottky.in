@@ -1,44 +1,18 @@
-# ======================================================================================================
-# SLALOM - Open-Source Solar Cell Multivariate Optimizer
-# Copyright(C) 2012-2019 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
-# (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
-# (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
-# (*) sidi.hamady@univ-lorraine.fr
-# SLALOM source code is available to download from:
-# https://github.com/sidihamady/SLALOM
-# https://hal.archives-ouvertes.fr/hal-01897934
-# http ://www.hamady.org/photovoltaics/slalom_source.zip
-# Cite as: S Ould Saad Hamady and N Fressengeas, EPJ Photovoltaics, 9:13, 2018.
-# See Copyright Notice in COPYRIGHT
-# ======================================================================================================
-
-# ------------------------------------------------------------------------------------------------------
-# File:        InGaN_PN.in
-# Type:        Deckbuild input
-# Purposes:    PN InGaN based solar cell
-# NB:          The output filenames (simuloutput_*) should remain unchanged and consistent
-#              ... between the optimizer Python code and the simulator input (this file)
-# ------------------------------------------------------------------------------------------------------
+# SLALOM
 
 go atlas
-
-#<START-Optim>
 
 # Indium composition in InGaN
 set AlloyComp=0.25
 
-# P-layer composition, thickness and doping
-set PLayerComp=$AlloyComp
-set PLayerThick=0.050
-set PLayerDop=1e+18
+# Schottky Contact Workfunction
+set Workfunction=5.65
 
 # N-layer composition, thickness and doping
 set NLayerComp=$AlloyComp
 set NLayerThick=0.500
 set NLayerDop=1e+17
 #
-
-#<END-Optim>
 
 # Highest bandgap value in the structure, used to calculate the highest voltage to reach
 # if VOC cannot be evaluated, increase this value or/and increase the number of points (voltagePoints)
@@ -57,7 +31,6 @@ set voltageStep=$voltageEnd/$voltagePoints
 set NPointsX=10
 # Set NPointsYlayer taking into account the whole range
 set NPointsYlayer1=50
-set NPointsYlayer2=50
 set DeviceDimX=1
 set DeviceSpacingX=$DeviceDimX/$NPointsX
 # Area in cm^2
@@ -79,17 +52,15 @@ mesh auto
 x.mesh loc=0.0 spacing=$DeviceSpacingX
 x.mesh loc=$DeviceDimX spacing=$DeviceSpacingX
 
-# Solar cell regions
-region number=1 material=InGaN bot ny=$NPointsYlayer1 x.comp=$PLayerComp thick=$PLayerThick
-region number=2 material=InGaN bot ny=$NPointsYlayer2 x.comp=$NLayerComp thick=$NLayerThick
+# Solar cell region
+region number=1 material=InGaN bot ny=$NPointsYlayer1 x.comp=$NLayerComp thick=$NLayerThick
 
 # Solar cell electrodes
 electrode number=1 name=anode top
 electrode number=2 name=cathode bottom
 
 # Doping parameters
-doping region=1 uniform conc=$PLayerDop p.type
-doping region=2 uniform conc=$NLayerDop n.type
+doping region=1 uniform conc=$NLayerDop n.type
 
 structure outfile="simuloutput_mesh.dat"
 #tonyplot "simuloutput_mesh.dat"
@@ -110,7 +81,7 @@ material    material=InGaN                    \
             f.conmup="InGaN_Mobility.c"
 
 # Contact parameters
-contact     name=anode neutral
+contact     name=anode workfun=$Workfunction barrier e.tunnel surf.rec vsurfn=1.0e3 vsurfp=1.0e3
 contact     name=cathode neutral
 
 # Model parameters (include at least SRH and Auger)

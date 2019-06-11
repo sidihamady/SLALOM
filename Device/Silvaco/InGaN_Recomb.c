@@ -1,6 +1,6 @@
 // ======================================================================================================
 // SLALOM - Open-Source Solar Cell Multivariate Optimizer
-// Copyright(C) 2012-2018 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
+// Copyright(C) 2012-2019 Sidi OULD SAAD HAMADY (1,2,*), Nicolas FRESSENGEAS (1,2). All rights reserved.
 // (1) Université de Lorraine, Laboratoire Matériaux Optiques, Photonique et Systèmes, Metz, F-57070, France
 // (2) Laboratoire Matériaux Optiques, Photonique et Systèmes, CentraleSupélec, Université Paris-Saclay, Metz, F-57070, France
 // (*) sidi.hamady@univ-lorraine.fr
@@ -8,6 +8,7 @@
 // https://github.com/sidihamady/SLALOM
 // https://hal.archives-ouvertes.fr/hal-01897934
 // http ://www.hamady.org/photovoltaics/slalom_source.zip
+// Cite as: S Ould Saad Hamady and N Fressengeas, EPJ Photovoltaics, 9:13, 2018.
 // See Copyright Notice in COPYRIGHT
 // ======================================================================================================
 
