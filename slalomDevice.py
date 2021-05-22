@@ -175,6 +175,42 @@ class slalomDevice(object):
             self.paramLogscale = [False, False, True, False]
             self.paramWeight = False
 
+        elif self.deviceType == "InGaN_Schottky_FixedComp":
+            # on a server with 8-core Xeon processors and 32 GB of RAM...
+            # one simulation takes up to five minutes, with the given input and parameters,
+            # strongly depending on numerical parameters (mesh, propagation, solver...) and device parameters.
+            # Deckbuild input filename
+            self.inputFilename = "InGaN_Schottky.in"
+            # Device description
+            self.mainTitle = "Schottky InGaN PV Cell"
+            # Output directory
+            self.outputDir = self.currentDir + "output" + self.dirSepChar + self.deviceType + self.dirSepChar
+            # Parameters name, as defined is the Deckbuild input
+            self.paramName = ["NLayerThick", "NLayerDop"]
+            # Parameters unit
+            self.paramUnit = ["um", "1/cm3"]
+            # Parameters format string (e.g. for doping use "%.6e")
+            self.paramFormat = ["%.8f", "%.6e"]
+            # Parameters short format string for console output (e.g. for doping use "%.4e")
+            self.paramFormatShort = ["%.6f", "%.4e"]
+            # Normalized parameters format string for console output
+            self.paramFormatNormalized = ["%.8f", "%.8f"]
+            # Normalization value for each parameter
+            self.paramNorm = np.array([1.000, 1e17])
+            # Parameters range limit (Start)
+            self.paramStart = np.array([0.01, 1e15])
+            # Parameters range limit (End)
+            self.paramEnd = np.array([0.700, 1e18])
+            # Parameters initial values (used as a starting point or when optimType is set to "Snap")
+            # should be in the [paramStart, paramEnd] range
+            self.paramInit = np.array([0.100, 1e16])
+            # Parameters number of points (used as when optimType is set to "Brute")
+            self.paramPoints = [5, 5]
+            # Parameters variation type (True for logarithmic variation (e.g. for doping), and False for linear)
+            self.paramLogscale = [False, True]
+            self.paramWeight = False
+
+
         elif self.deviceType == "CZTS":
             # on a server with 8-core Xeon processors and 32 GB of RAM...
             # one simulation takes up to ten minutes, with the given input and parameters,
@@ -338,7 +374,7 @@ class slalomDevice(object):
                 strT += (self.paramFormat[paramCount - 1] % self.paramInit[paramCount - 1]) + "\n"
 
                 strT += "---------------------------------------------------------------\n"
-                print strT
+                print(strT)
             # end if printOut
 
         #end if

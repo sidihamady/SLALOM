@@ -32,15 +32,18 @@ TkFound = False
 
 try:
     if sys.version_info[0] < 3:
+        # Python 2.7.x
         import Tkinter as Tk
         import ttk
+        import tkFileDialog
+        import tkMessageBox
     else:
+        # Python 3.x
         import tkinter as Tk
         import tkinter.ttk as ttk
+        import tkinter.filedialog as tkFileDialog
+        import tkinter.messagebox as tkMessageBox
     # end if
-    from ttk import *
-    import tkMessageBox
-    import tkFileDialog
     TkFound = True
 except ImportError as ierr:
     # tkinter related modules not found. Just warn and skip this part.

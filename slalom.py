@@ -51,7 +51,7 @@ deviceSimulator = "atlas"
 # it can be set to a permanent directory name for a specific project.
 # the dir name should be ended with the path separator ('/' under Linux)
 #currentDir = "/home/sidi/TCAD/SLALOM/Device/Silvaco/"
-currentDir = "N:\\TCAD\\SLALOM\\Device\\Silvaco\\"
+currentDir = "M:\\TCAD\\SLALOM\\Device\\Silvaco\\"
 
 # remoteDir is the name of the remote directory used when using SSH to connect...
 # ...to a remote server where the simulator is installed.
@@ -70,13 +70,13 @@ remoteSSHhost = ""#"sidi@efprimix"
 # The devices are defined in the slalomDevice class.
 # Set deviceType to a predefined device (included in slalomDevice.py)...
 # ...or set it to None and define the parameters in the optimizer GUI.
-deviceType = "InGaN_Schottky"
+deviceType = "InGaN_Schottky_FixedComp"
 
 # The optimization mode: "Brute" (brute force), "Optim" (optimization) or "Snap" (one point)
 optimType = "Optim"
 
 # The optimization method: "L-BFGS-B", "SLSQP" or "Bayes"
-minimizeMethod = "SLSQP"
+minimizeMethod = "Bayes"
 
 # The maximum number of iterations
 maxIter = 100
@@ -101,7 +101,7 @@ enableGUI = True
 # command line arguments: python slalom.py --enableGUI --currentDir ... --remoteDir ... --remoteSSH ... --deviceType ... --optimType ... --minimizeMethod ...
 # examples:
 # python slalom.py --enableGUI No
-# python slalom.py --currentDir "N:\\TCAD\\SLALOM\\Device\\Silvaco\\" --remoteDir "/home/sidi/SLALOM/Device/Silvaco/" --remoteSSH user@slalom --deviceType InGaN_PN --optimType Optim --minimizeMethod SLSQP
+# python slalom.py --currentDir "M:\\TCAD\\SLALOM\\Device\\Silvaco\\" --remoteDir "/home/sidi/SLALOM/Device/Silvaco/" --remoteSSH user@slalom --deviceType InGaN_PN --optimType Optim --minimizeMethod SLSQP
 
 argc = len(sys.argv) - 1
 
@@ -186,7 +186,7 @@ if argc >= 1:
             raise Exception(errMsg)
         # end if
     except Exception as excT:
-        errMsg = str(excT) + '\nSLALOM usage:\n python slalom.py [args]\n  Examples:\n' + '   python slalom.py\n   python slalom.py --deviceType InGaN_PN --optimType Optim --minimizeMethod SLSQP\n   python slalom.py --deviceSimulator atlas --currentDir "N:\\TCAD\\SLALOM\\Device\\Silvaco\\" --remoteDir "/home/sidi/SLALOM/Device/Silvaco/" --remoteSSH sidi@efprimix --deviceType InGaN_PN --optimType Optim --minimizeMethod SLSQP'
+        errMsg = str(excT) + '\nSLALOM usage:\n python slalom.py [args]\n  Examples:\n' + '   python slalom.py\n   python slalom.py --deviceType InGaN_PN --optimType Optim --minimizeMethod SLSQP\n   python slalom.py --deviceSimulator atlas --currentDir "M:\\TCAD\\SLALOM\\Device\\Silvaco\\" --remoteDir "/home/sidi/SLALOM/Device/Silvaco/" --remoteSSH sidi@efprimix --deviceType InGaN_PN --optimType Optim --minimizeMethod SLSQP'
         dispError(errMsg, doExit = True)
         # never reached
         pass
@@ -516,7 +516,7 @@ if remoteMon:
         fileT.write(fileContent)
         fileT.close()
 
-        print '\nfiles copied to the local directory: ' + tmpDir
+        print('\nfiles copied to the local directory: ' + tmpDir)
 
         STDDEVNULL = open(os.devnull, 'w')
 
@@ -541,7 +541,7 @@ if remoteMon:
             pass
         # end try
 
-        print '\nfiles copied to the remote server: ' + remoteSSHhost + ':' + remoteDir
+        print('\nfiles copied to the remote server: ' + remoteSSHhost + ':' + remoteDir)
 
         # remove the temporary files
         for fileT in os.listdir(tmpDirRaw):
@@ -597,7 +597,7 @@ if remoteMon:
         strT += "remote directory:\n   " + remoteDir + "\n"
         strT += "remote data filename:\n   " + (optimFilename if bFound else "not found (check server status)")
         strT += "\n---------------------------------------------------------------\n"
-        print strT
+        print(strT)
 
         # set enableMonitor to True to start the optimizer monitor
         enableMonitor = enableGUI

@@ -22,7 +22,7 @@
 #                 ...creating a new inherited class. Here, perform only performance tuning and bug fixing.
 # ------------------------------------------------------------------------------------------------------
 
-slalomVersion = 'Version: 1.2 Build: 1904'
+slalomVersion = 'Version: 1.2 Build: 2105'
 
 # Calculation
 import math
@@ -55,7 +55,7 @@ def dispError(message, doExit = True, atExit = None, errFilename = None, **atExi
             strT += "\n"
         # end if
         strT +=      "---------------------------------------------------------------\n"
-        print strT
+        print(strT)
         if doExit == False:
             return
         # end if
@@ -227,7 +227,7 @@ class slalomCore(object):
         """ internal logging routine (the significant events are logged in the log file) """
 
         try:
-            print strT
+            print(strT)
             fileT = open(self.outputDir + self.logFilename, "a")
             fileT.write(strT)
             fileT.close()
@@ -635,10 +635,10 @@ class slalomCore(object):
             # end if
             fileT = open(self.outputDir + self.verboseFilename, "r")
             strT = "\n# ---------------------- SIMULATOR OUTPUT: ----------------------\n\n"
-            print strT
+            print(strT)
             for lineT in fileT:
                 strT += "# " + lineT
-                print lineT
+                print(lineT)
                 curLine += 1
                 if curLine >= maxLines:
                     strT += "\n# SIMULATOR OUTPUT TOO LONG\n"
@@ -647,7 +647,7 @@ class slalomCore(object):
             # end for
             fileT.close()
             strTT = "\n\n# ---------------------------------------------------------------\n"
-            print strTT
+            print(strTT)
             strT += strTT
         except:
             strT = "\n# ----------------------- SIMULATOR ERROR: -----------------------\n"
@@ -965,7 +965,7 @@ class slalomCore(object):
         try:
             tEnv = dict(os.environ)
             subprocess.check_call([self.outputDir + self.commandFilename, ""], shell=True, env=tEnv)
-        except subprocess.CalledProcessError, excT:
+        except (subprocess.CalledProcessError, excT):
             try:
                 strT = self.printOutput()
                 fileOptim = open(self.outputDir + self.outputOptimizedFilename, "a")

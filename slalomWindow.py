@@ -36,23 +36,31 @@ import re
 # ....and restart slalomMonitor).
 TkFound = False
 
-import matplotlib
-matplotlib.use('Agg')
-
 try:
+    import matplotlib
     matplotlib.use('TkAgg')
+    import matplotlib.pyplot as pl
+    from matplotlib.backends.backend_pdf import PdfPages
     import matplotlib.backends.backend_tkagg
-    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+    from matplotlib.font_manager import FontProperties
     if sys.version_info[0] < 3:
+        # Python 2.7.x
+        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
         import Tkinter as Tk
         import ttk
+        import tkFileDialog
+        import tkFont
+        import tkMessageBox
     else:
+        # Python 3.x
+        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+        from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk as NavigationToolbar2TkAgg
         import tkinter as Tk
         import tkinter.ttk as ttk
+        import tkinter.filedialog as tkFileDialog
+        import tkinter.font as tkFont
+        import tkinter.messagebox as tkMessageBox
     # end if
-    from ttk import *
-    import tkMessageBox
-    import tkFileDialog
     import matplotlib.pyplot as pl
     from matplotlib.backends.backend_pdf import PdfPages
     from matplotlib.ticker import MaxNLocator
